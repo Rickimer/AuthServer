@@ -94,14 +94,14 @@ namespace AuthServer.Controllers
         }
 
         [HttpPost("LogOut")]        
-        public async Task<IActionResult> LogOut()
+        public IActionResult LogOut()
         {
             Response.Cookies.Delete("jwt");
             return Ok();
         }
 
         [HttpGet("Relogin")]
-        public async Task<IActionResult> ReLogin(string ReturnUrl)
+        public IActionResult ReLogin(string ReturnUrl)
         {
             return StatusCode(403);            
         }

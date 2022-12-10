@@ -7,9 +7,9 @@ namespace AuthServer.Models
 {
     public class UserDbContext : IdentityDbContext<IdentityUser>
     {
-        public DbSet<User> Users { get; set; }
-        public DbSet<Todo> Todos { get; set; }
-        public DbSet<Traffic> Traffic { get; set; }
+        public DbSet<User> AuthUsers => Set<User>();
+        public DbSet<Todo> Todos => Set<Todo>();
+        public DbSet<Traffic> Traffic => Set<Traffic>();
 
         public UserDbContext()
         {

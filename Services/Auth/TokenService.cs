@@ -10,7 +10,7 @@ using System.Text;
 
 namespace AuthServer.Services.Auth
 {
-    public class TokenService: ITokenService
+    public class TokenService : ITokenService
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly ILogger<TokenService> _logger;
@@ -18,18 +18,18 @@ namespace AuthServer.Services.Auth
         private readonly DateTime _tokenMinutesLifeTime;
         private readonly DateTime _refreshTokenDaysLifeTime;
 
-        public TokenService(UserManager<IdentityUser> userManager,            
+        public TokenService(UserManager<IdentityUser> userManager,
             IOptions<JWTSettings> jwtSettings,
-            ILogger<TokenService> logger            
+            ILogger<TokenService> logger
             )
         {
             _jwtSettings = jwtSettings.Value;
             _logger = logger;
             _userManager = userManager;
-            _tokenMinutesLifeTime = DateTime.UtcNow.Add(TimeSpan.FromMinutes(_jwtSettings.TokenMinutesLifeTime));             
+            _tokenMinutesLifeTime = DateTime.UtcNow.Add(TimeSpan.FromMinutes(_jwtSettings.TokenMinutesLifeTime));
             _refreshTokenDaysLifeTime = DateTime.UtcNow.Add(TimeSpan.FromDays(_jwtSettings.RefreshTokenDaysLifeTime));
         }
-        
+
         private async Task<List<Claim>> GetClaims(IdentityUser user)
         {
             var roles = await _userManager.GetRolesAsync(user);
@@ -67,7 +67,7 @@ namespace AuthServer.Services.Auth
                     issuer: _jwtSettings.Issuer,
                     audience: _jwtSettings.Audience,
                     claims: claims,
-                    expires: lifeTime,                    
+                    expires: lifeTime,
                     notBefore: DateTime.UtcNow,
                     signingCredentials: new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256)
                 );
@@ -89,36 +89,29 @@ namespace AuthServer.Services.Auth
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey));
 
-            try
+            tokenHandler.ValidateToken(token, new TokenValidationParameters
             {
-                tokenHandler.ValidateToken(token, new TokenValidationParameters
-                {
-                    ValidateIssuerSigningKey = true,
-                
-                    IssuerSigningKey = key,
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                    ClockSkew = TimeSpan.Zero
-                }, out SecurityToken validatedToken);
+                ValidateIssuerSigningKey = true,
 
-                var jwtToken = (JwtSecurityToken)validatedToken;
-                var email = jwtToken.Claims.First(x => x.Type == "email").Value;
+                IssuerSigningKey = key,
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ClockSkew = TimeSpan.Zero
+            }, out SecurityToken validatedToken);
 
-                var user = (User)await _userManager.FindByEmailAsync(email);
-                if (user == null)
-                    throw new Exception("user not found");
+            var jwtToken = (JwtSecurityToken)validatedToken;
+            var email = jwtToken.Claims.First(x => x.Type == "email").Value;
 
-                if (!String.Equals(user.RefreshToken, token, StringComparison.InvariantCulture))
-                {
-                    throw new Exception("wrong refreshToken");
-                }
-                
-                return email;
-            }
-            catch (Exception ex)
+            var user = (User)await _userManager.FindByEmailAsync(email);
+            if (user == null)
+                throw new Exception("user not found");
+
+            if (!String.Equals(user.RefreshToken, token, StringComparison.InvariantCulture))
             {
-                return null;
+                throw new Exception("wrong refreshToken");
             }
-        }        
+
+            return email;
+        }
     }
 }

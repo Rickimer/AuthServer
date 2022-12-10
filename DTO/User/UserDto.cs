@@ -2,8 +2,8 @@
 {
     public class UserDto : UserBaseDto
     {
-        public string RefreshToken { get; set; }
+        public string RefreshToken { get; set; } = string.Empty;
         public DateTime LastCreatedRefreshToken { get; set; }
-        public string PasswordHash { get; set; }
+        public string PasswordHash { get; set; } = string.Empty;
     }
 }
