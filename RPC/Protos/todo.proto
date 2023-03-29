@@ -1,0 +1,43 @@
+﻿syntax = "proto3";
+option csharp_namespace = "TodoClient";
+package todo;
+
+import "google/protobuf/empty.proto";
+//The TodoRPC service definition.
+service TodoRPC {
+	rpc GetTodos (RPCUser) returns (RPCTodos);
+	rpc CreateTodo (RPCCreateTodo) returns (RPCTodoId);
+	rpc UpdateTodo (RPCUpdateTodo) returns (google.protobuf.Empty);
+	rpc DeleteTodo (RPCDeleteTodo) returns (google.protobuf.Empty);	
+}
+
+message RPCUser {
+	uint64 userId = 1;
+}
+
+message RPCTodos {
+	repeated RPCTodo todos = 1;
+}
+
+message RPCTodo {
+	uint64 Id = 1;
+	string Title = 2;
+}
+
+message RPCTodoId {
+	uint64 Id = 1;	
+}
+  
+message RPCCreateTodo {  
+	uint64 UserId = 1;
+	string Title = 2;
+}
+
+message RPCDeleteTodo {  
+	uint64 TodoId = 1;  
+}
+
+message RPCUpdateTodo {
+	uint64 Id = 1;
+	string Title = 2;
+}
